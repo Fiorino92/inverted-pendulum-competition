@@ -1,37 +1,74 @@
-"""Supervisor of the Robot Programming Competition."""
+"""Controller program to manage the benchmark.
+
+It manages the perturbation and evaluates the performance of the user
+controller.
+"""
 
 from controller import Supervisor
 import os
+import random
+import sys
 
-supervisor = Supervisor()
+BENCHMARK_NAME = "Inverted Pendulum"
 
-timestep = int(supervisor.getBasicTimeStep())
 
-thymio = supervisor.getFromDef("COMPETITION_ROBOT")
-translation = thymio.getField("translation")
+# function to convert a time in seconds to a string with format mm:ss:cs with zero padding
+def timeToString(time):
+    minutes = int(time / 60)
+    seconds = int(time - minutes * 60)
+    centiseconds = int((time - minutes * 60 - seconds) * 100)
+    return f"{minutes:02d}:{seconds:02d}.{centiseconds:02d}"
 
-tx = 0
-ongoing_competition = True
-while supervisor.step(timestep) != -1 and ongoing_competition:
-    t = translation.getSFVec3f()
-    if ongoing_competition:
-        percent = 1 - abs(0.25 + t[0]) / 0.25
-        if percent < 0:
-            percent = 0
-        if t[0] < -0.01 and abs(t[0] - tx) < 0.0001:  # away from starting position and not moving any more
-            ongoing_competition = False
-            name = 'Robot Programming'
-            message = f'success:{name}:{percent}:{percent*100:.2f}%'
+
+# Get random generator seed value from 'controllerArgs' field
+seed = 1
+if len(sys.argv) > 1 and sys.argv[1].startswith('seed='):
+    seed = int(sys.argv[1].split('=')[1])
+
+robot = Supervisor()
+
+timestep = int(robot.getBasicTimeStep())
+
+jointParameters = robot.getFromDef("PENDULUM_PARAMETERS")
+positionField = jointParameters.getField("position")
+
+# emitter needed for the physics plugin?
+emitter = robot.getDevice("emitter")
+time = 0
+force = 0
+forceStep = 800
+random.seed(seed)
+running = True
+
+while robot.step(timestep) != -1 and running:
+    if running:
+        time = robot.getTime()
+        robot.wwiSendText(f"timeString_{timeToString(time)}")
+        robot.wwiSendText(f"force:{force:.2f}")
+
+        # Detect status of inverted pendulum
+        position = positionField.getSFFloat()
+        if position < -1.58 or position > 1.58:
+            # stop
+            running = False
+            message = f'success:{BENCHMARK_NAME}:{time}_{timeToString(time)}'
+            robot.wwiSendText(message)
         else:
-            message = f"percent:{percent}"
-        supervisor.wwiSendText(message)
-        tx = t[0]
-
-print(f"Competition complete! Your performance was {message.split(':')[3]}")
+            if forceStep <= 0:
+                forceStep = 800 + random.randint(0, 400)
+                force = force + 0.02
+                toSend = f"{force:.2f} {seed}"
+                if sys.version_info.major > 2:
+                    toSend = bytes(toSend, "utf-8")
+                emitter.send(toSend)
+            else:
+                forceStep = forceStep - 1
 
 # Performance output used by automated CI script
 CI = os.environ.get("CI")
 if CI:
-    print(f"performance:{percent}")
+    print(f"performance:{time}")
+else:
+    print(f"{BENCHMARK_NAME} benchmark complete! Your performance was {timeToString(time)}")
 
-supervisor.simulationSetMode(Supervisor.SIMULATION_MODE_PAUSE)
+robot.simulationSetMode(Supervisor.SIMULATION_MODE_PAUSE)

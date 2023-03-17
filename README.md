@@ -1,6 +1,6 @@
 <span id="title">
 
-# Competition Organizer Template
+# Inverted Pendulum Competition
 
 </span>
 
@@ -22,7 +22,7 @@ To organize your own competition, follow the instructions in the [ORGANIZER.md](
 
 <span id="description">
 
-Write here a short description of your competition.
+Program an e-puck robot to maintain an inverted pendulum up as long as possible.
 
 </span>
 
