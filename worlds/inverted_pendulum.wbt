@@ -18,7 +18,7 @@ WorldInfo {
     "Perturbations with increasing strength are applied to the pendulum."
     "measure the simulation time "
   ]
-  title "Container Inverted Pendulum"
+  title "Inverted Pendulum Competition"
   window "inverted_pendulum_benchmark"
   physics "inverted_pendulum_perturbation"
   basicTimeStep 4
