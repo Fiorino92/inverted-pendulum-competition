@@ -27,7 +27,7 @@ WorldInfo {
 Viewpoint {
   orientation 0.14531676566957988 0.00568264232883965 -0.9893688620486774 3.1670920620286416
   position 2.246643201853611 0.17220873656899566 0.4957618929695692
-  follow "e-puck"
+  follow "participant"
 }
 TexturedBackground {
   texture "entrance_hall"

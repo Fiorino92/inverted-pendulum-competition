@@ -4,9 +4,8 @@ simulationViewPerspectives: 000000ff000000010000000200000118000003ca010000000201
 sceneTreePerspectives: 000000ff0000000100000003000000c0000000fc000000000100000002010000000200
 maximizedDockId: -1
 centralWidgetVisible: 1
-userInteractions: 3dContextMenuDisabled::objectMoveDisabled::forceAndTorqueDisabled
 orthographicViewHeight: 1
 textFiles: 0 "controllers/participant/participant.py"
 robotWindow: robot
 consoles: Console:All:All
-renderingDevicePerspectives: e-puck:camera;0;1;0;0
+renderingDevicePerspectives: participant:camera;1;1;0;0
